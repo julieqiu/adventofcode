@@ -1,30 +1,20 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
+
+	runner "github.com/julieqiu/adventofcode/2024/internal/runner"
 )
 
-const input = "input.txt"
-
 func main() {
-	lines, err := readLines()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := problem1(lines); err != nil {
-		log.Fatal(err)
-	}
-	if err := problem2(lines); err != nil {
+	if err := runner.Run(problem1, problem2); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func problem1(lines []string) error {
+func problem1(lines []string) (int, error) {
 	var sum int
 	for _, line := range lines {
 		chunks := strings.Split(line, "mul(")
@@ -45,11 +35,10 @@ func problem1(lines []string) error {
 			sum += mul(a, b)
 		}
 	}
-	fmt.Printf("Answer (part 1): %d\n", sum)
-	return nil
+	return sum, nil
 }
 
-func problem2(lines []string) error {
+func problem2(lines []string) (int, error) {
 	var (
 		sum  int
 		skip bool
@@ -82,8 +71,7 @@ func problem2(lines []string) error {
 			}
 		}
 	}
-	fmt.Printf("Answer (part 2): %d\n", sum)
-	return nil
+	return sum, nil
 }
 
 func maybeMultiply(line string) (sum int, incr int) {
@@ -103,28 +91,4 @@ func maybeMultiply(line string) (sum int, incr int) {
 
 func mul(a, b int) int {
 	return a * b
-}
-
-func readLines() (_ []string, err error) {
-	file, err := os.Open(input)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		cerr := file.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-
-	var list []string
-	scanner := bufio.NewScanner(file)
-	// optionally, resize scanner's capacity for lines over 64K, see next example
-	for scanner.Scan() {
-		list = append(list, scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return list, nil
 }
