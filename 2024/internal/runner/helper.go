@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"testing"
 )
 
 func Run(problem1, problem2 func([]string) (int, error)) error {
-	input, err := inputFile()
+	input, err := readFile("input.txt")
 	if err != nil {
 		return err
 	}
@@ -27,6 +28,26 @@ func Run(problem1, problem2 func([]string) (int, error)) error {
 	}
 	fmt.Printf("Answer (part 2): %v\n", ans)
 	return nil
+}
+
+func RunTest(t *testing.T, problem func([]string) (int, error), want int) {
+	t.Helper()
+
+	input, err := readFile("example.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines, err := readLines(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := problem(lines)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != want {
+		t.Errorf("got = %d; want = %d", got, want)
+	}
 }
 
 func readLines(input string) (_ []string, err error) {
@@ -53,10 +74,10 @@ func readLines(input string) (_ []string, err error) {
 	return list, nil
 }
 
-func inputFile() (string, error) {
+func readFile(f string) (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/input.txt", dir), nil
+	return fmt.Sprintf("%s/%s", dir, f), nil
 }

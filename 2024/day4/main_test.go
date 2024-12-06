@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/julieqiu/adventofcode/2024/internal/runner"
 )
 
 const testInput = `
@@ -34,20 +34,15 @@ S.S.S.S.SS
 `
 
 func TestProblem1(t *testing.T) {
+	runner.RunTest(t, problem1, 18)
+
 	input := strings.Fields(testInput)
 	ws := newWordSearch(input)
-	ans := ws.solveXMAS()
 	if diff := cmp.Diff(want, ws.printUsed()); diff != "" {
-		fmt.Println(diff)
-		fmt.Println(ans)
+		t.Log(diff)
 	}
 }
 
 func TestProblem2(t *testing.T) {
-	input := strings.Fields(testInput)
-	ws := newWordSearch(input)
-	ans := ws.solveMAS()
-	if ans != 9 {
-		t.Error(ans)
-	}
+	runner.RunTest(t, problem2, 9)
 }

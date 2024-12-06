@@ -2,11 +2,14 @@ package main
 
 import (
 	"testing"
+
+	"github.com/julieqiu/adventofcode/2024/internal/runner"
 )
 
+func TestProblem1(t *testing.T) {
+	runner.RunTest(t, problem1, 161)
+}
+
 func TestProblem2(t *testing.T) {
-	test := []string{"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"}
-	if _, err := problem2(test); err != nil {
-		t.Fatal(err)
-	}
+	runner.RunTest(t, problem2, 48)
 }
