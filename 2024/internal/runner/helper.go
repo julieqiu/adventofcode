@@ -12,7 +12,7 @@ func Run(problem1, problem2 func([]string) (int, error)) error {
 	if err != nil {
 		return err
 	}
-	lines, err := readLines(input)
+	lines, err := ReadLines(input)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func RunTest(t *testing.T, problem func([]string) (int, error), want int) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	lines, err := readLines(input)
+	lines, err := ReadLines(input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func RunTest(t *testing.T, problem func([]string) (int, error), want int) {
 	}
 }
 
-func readLines(input string) (_ []string, err error) {
+func ReadLines(input string) (_ []string, err error) {
 	file, err := os.Open(input)
 	if err != nil {
 		return nil, err
@@ -80,4 +80,15 @@ func readFile(f string) (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%s/%s", dir, f), nil
+}
+
+func ReadRuneGrid(lines []string) (_ [][]rune) {
+	grid := make([][]rune, len(lines))
+	for r, row := range lines {
+		grid[r] = make([]rune, len(lines[0]))
+		for c, val := range row {
+			grid[r][c] = val
+		}
+	}
+	return grid
 }
