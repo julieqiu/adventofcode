@@ -87,17 +87,6 @@ func readFile(f string) (string, error) {
 	return fmt.Sprintf("%s/%s", dir, f), nil
 }
 
-func ReadRuneGrid(lines []string) (_ [][]rune) {
-	grid := make([][]rune, len(lines))
-	for r, row := range lines {
-		grid[r] = make([]rune, len(lines[0]))
-		for c, val := range row {
-			grid[r][c] = val
-		}
-	}
-	return grid
-}
-
 func ReadIntGrid(lines []string) (_ [][]int, err error) {
 	grid := make([][]int, len(lines))
 	for r, row := range lines {

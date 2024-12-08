@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/julieqiu/adventofcode/2024/internal/grid"
 	"github.com/julieqiu/adventofcode/2024/internal/runner"
 )
 
@@ -20,18 +21,18 @@ func TestInifiniteLoop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	grid := runner.ReadRuneGrid(lines)
-	curr := findGuard(grid)
+	g := grid.New(lines)
+	curr := findGuard(g)
 
-	grid[9][81] = 'O'
-	curr.x = 9
-	curr.y = 20
+	g.Set(9, 81, 'O')
+	curr.X = 9
+	curr.Y = 20
 	curr.dir = RIGHT
-	result := countPositions(curr, grid)
+	result := countPositions(curr, g)
 	if result != -1 {
 		t.Error(result)
 	}
-	printGrid(grid)
+	g.Print()
 }
 
 func Test923Loop(t *testing.T) {
@@ -40,13 +41,13 @@ func Test923Loop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	grid := runner.ReadRuneGrid(lines)
-	curr := findGuard(grid)
+	g := grid.New(lines)
+	curr := findGuard(g)
 
-	grid[9][23] = 'O'
-	result := countPositions(curr, grid)
+	g.Set(9, 23, 'O')
+	result := countPositions(curr, g)
 	if result != -1 {
 		t.Error(result)
 	}
-	printGrid(grid)
+	g.Print()
 }

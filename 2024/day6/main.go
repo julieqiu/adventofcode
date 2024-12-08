@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/julieqiu/adventofcode/2024/internal/grid"
 	"github.com/julieqiu/adventofcode/2024/internal/runner"
 )
 
@@ -14,129 +15,121 @@ func main() {
 }
 
 func problem1(lines []string) (int, error) {
-	grid := runner.ReadRuneGrid(lines)
-	start := findGuard(grid)
-	count := countPositions(start, grid)
+	g := grid.New(lines)
+	start := findGuard(g)
+	count := countPositions(start, g)
 	return count, nil
 }
 
 func problem2(lines []string) (int, error) {
-	grid := runner.ReadRuneGrid(lines)
-	start := findGuard(grid)
-	gridCopy := newGrid(grid)
+	g := grid.New(lines)
+	start := findGuard(g)
+	gridCopy := g.Copy()
 
 	var count int
-	for x := range grid {
-		for y := range grid[0] {
-			newgrid := newGrid(gridCopy)
-			newgrid[x][y] = 'O'
+	g.Walk(func(r, c int) {
+		newgrid := gridCopy.Copy()
+		newgrid.Set(r, c, 'O')
 
-			result := countPositions(start, newgrid)
-			if result == -1 {
-				count += 1
-				fmt.Println(x, y)
-			}
+		result := countPositions(start, newgrid)
+		if result == -1 {
+			count += 1
+			fmt.Println(r, c)
 		}
-	}
+	})
 	return count, nil
 }
 
 var (
-	UP    = direction{x: -1, y: 0}
-	DOWN  = direction{x: 1, y: 0}
-	LEFT  = direction{x: 0, y: -1}
-	RIGHT = direction{x: 0, y: 1}
+	UP    = direction{Point: grid.Point{X: grid.UP, Y: 0}}
+	DOWN  = direction{Point: grid.Point{X: grid.DOWN, Y: 0}}
+	LEFT  = direction{Point: grid.Point{X: 0, Y: grid.LEFT}}
+	RIGHT = direction{Point: grid.Point{X: 0, Y: grid.RIGHT}}
 )
 
 type position struct {
-	x   int
-	y   int
+	grid.Point
 	dir direction
 }
 
 type direction struct {
-	x int
-	y int
+	grid.Point
 }
 
-func findGuard(grid [][]rune) position {
+func findGuard(g *grid.Grid) position {
 	var curr position
-	for r, row := range grid {
-		for c, val := range row {
-			switch val {
-			case '^':
-				curr = position{x: r, y: c, dir: UP}
-			case '>':
-				curr = position{x: r, y: c, dir: RIGHT}
-			case 'v':
-				curr = position{x: r, y: c, dir: DOWN}
-			case '<':
-				curr = position{x: r, y: c, dir: LEFT}
-			}
+	g.Walk(func(r, c int) {
+		val := g.Get(r, c)
+		switch val {
+		case '^':
+			curr = position{Point: grid.Point{X: r, Y: c}, dir: UP}
+		case '>':
+			curr = position{Point: grid.Point{X: r, Y: c}, dir: RIGHT}
+		case 'v':
+			curr = position{Point: grid.Point{X: r, Y: c}, dir: DOWN}
+		case '<':
+			curr = position{Point: grid.Point{X: r, Y: c}, dir: LEFT}
 		}
-	}
+	})
 	return curr
 }
 
-func countPositions(curr position, grid [][]rune) int {
+func countPositions(curr position, g *grid.Grid) int {
 	c := 0
 	seen := map[position]bool{}
 	for {
 		c += 1
 		seen[curr] = true
 
-		x := curr.x + curr.dir.x
-		y := curr.y + curr.dir.y
+		row := curr.Y + curr.dir.Y
+		col := curr.X + curr.dir.X
 
-		if x < 0 || x >= len(grid) {
-			break
-		}
-		if y < 0 || y >= len(grid[0]) {
+		if !g.InBounds(col, row) {
 			break
 		}
 
-		if grid[x][y] == '#' || grid[x][y] == 'O' {
+		if g.Equal(col, row, '#') || g.Equal(col, row, 'O') {
 			curr.dir = turn(curr.dir)
-			if grid[curr.x][curr.y] != '^' {
-				grid[curr.x][curr.y] = '+'
+			if !g.Equal(curr.X, curr.Y, '^') {
+				g.Set(curr.X, curr.Y, '+')
 			}
 			continue
 		}
 
 		// Advance forward.
-		curr.x = x
-		curr.y = y
+		curr.X = col
+		curr.Y = row
 		if seen[curr] {
 			return -1
 		}
 
-		if grid[x][y] != '^' {
-			if curr.dir.x != 0 {
-				if grid[x][y] == '-' {
-					grid[x][y] = '+'
+		if !g.Equal(col, row, '^') {
+			if curr.dir.X != 0 {
+				if g.Equal(col, row, '-') {
+					g.Set(col, row, '+')
 				} else {
-					grid[x][y] = '|'
+					g.Set(col, row, '|')
 				}
 			} else {
-				if grid[x][y] == '|' {
-					grid[x][y] = '+'
+				if g.Equal(col, row, '|') {
+					g.Set(col, row, '+')
 				} else {
-					grid[x][y] = '-'
+					g.Set(col, row, '-')
 				}
 			}
 		}
 	}
 
-	visit := map[position]struct{}{}
+	visit := map[grid.Point]struct{}{}
 	for s := range seen {
-		visit[position{x: s.x, y: s.y}] = struct{}{}
+		visit[grid.Point{X: s.X, Y: s.Y}] = struct{}{}
 	}
 	return len(visit)
 }
 
 func turn(dir direction) direction {
-	swap := dir.x * -1
-	dir.x = dir.y
-	dir.y = swap
+	swap := dir.X * -1
+	dir.X = dir.Y
+	dir.Y = swap
 	return dir
 }

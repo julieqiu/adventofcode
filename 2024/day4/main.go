@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/julieqiu/adventofcode/2024/internal/grid"
 	"github.com/julieqiu/adventofcode/2024/internal/runner"
 )
 
@@ -58,20 +59,16 @@ func (ws *wordsearch) printUsed() string {
 const (
 	XMAS     = "XMAS"
 	MAS      = "MAS"
-	UP       = -1
-	LEFT     = -1
-	DOWN     = 1
-	RIGHT    = 1
 	STRAIGHT = 0
 )
 
 func (ws *wordsearch) solveMAS() int {
 	for row, line := range ws.lines {
 		for col := range line {
-			if ws.search(MAS, row+LEFT, col+UP, RIGHT, DOWN)+
-				ws.search(MAS, row+LEFT, col+DOWN, RIGHT, UP)+
-				ws.search(MAS, row+RIGHT, col+UP, LEFT, DOWN)+
-				ws.search(MAS, row+RIGHT, col+DOWN, LEFT, UP) >= 2 {
+			if ws.search(MAS, row+grid.LEFT, col+grid.UP, grid.RIGHT, grid.DOWN)+
+				ws.search(MAS, row+grid.LEFT, col+grid.DOWN, grid.RIGHT, grid.UP)+
+				ws.search(MAS, row+grid.RIGHT, col+grid.UP, grid.LEFT, grid.DOWN)+
+				ws.search(MAS, row+grid.RIGHT, col+grid.DOWN, grid.LEFT, grid.UP) >= 2 {
 				ws.count += 1
 			}
 		}
@@ -85,14 +82,14 @@ func (ws *wordsearch) solveXMAS() int {
 			if string(c) != "X" {
 				continue
 			}
-			ws.count += ws.search(XMAS, row, col, RIGHT, STRAIGHT)
-			ws.count += ws.search(XMAS, row, col, LEFT, STRAIGHT)
-			ws.count += ws.search(XMAS, row, col, STRAIGHT, UP)
-			ws.count += ws.search(XMAS, row, col, STRAIGHT, DOWN)
-			ws.count += ws.search(XMAS, row, col, RIGHT, UP)
-			ws.count += ws.search(XMAS, row, col, RIGHT, DOWN)
-			ws.count += ws.search(XMAS, row, col, LEFT, UP)
-			ws.count += ws.search(XMAS, row, col, LEFT, DOWN)
+			ws.count += ws.search(XMAS, row, col, grid.RIGHT, STRAIGHT)
+			ws.count += ws.search(XMAS, row, col, grid.LEFT, STRAIGHT)
+			ws.count += ws.search(XMAS, row, col, STRAIGHT, grid.UP)
+			ws.count += ws.search(XMAS, row, col, STRAIGHT, grid.DOWN)
+			ws.count += ws.search(XMAS, row, col, grid.RIGHT, grid.UP)
+			ws.count += ws.search(XMAS, row, col, grid.RIGHT, grid.DOWN)
+			ws.count += ws.search(XMAS, row, col, grid.LEFT, grid.UP)
+			ws.count += ws.search(XMAS, row, col, grid.LEFT, grid.DOWN)
 		}
 	}
 	return ws.count

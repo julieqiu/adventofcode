@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/julieqiu/adventofcode/2024/internal/grid"
 	"github.com/julieqiu/adventofcode/2024/internal/runner"
 )
 
@@ -11,11 +11,6 @@ func main() {
 	if err := runner.Run(problem1, problem2); err != nil {
 		log.Fatal(err)
 	}
-}
-
-type point struct {
-	x int
-	y int
 }
 
 func problem1(lines []string) (int, error) {
@@ -27,43 +22,39 @@ func problem2(lines []string) (int, error) {
 }
 
 func solve(lines []string, includeHarmonics bool) (int, error) {
-	antennas := map[rune][]point{}
-	for y, row := range lines {
-		for x, val := range row {
-			if val != '.' {
-				antennas[val] = append(antennas[val], point{x: x, y: y})
-			}
+	antennas := map[rune][]grid.Point{}
+	g := grid.New(lines)
+	g.Walk(func(r, c int) {
+		val := g.Get(r, c)
+		if val != '.' {
+			antennas[val] = append(antennas[val], grid.Point{X: c, Y: r})
 		}
-	}
+	})
 
-	seen := map[point]bool{}
+	seen := map[grid.Point]bool{}
 	for _, ants := range antennas {
-		antinodes := findAntinodes(ants, len(lines[0]), len(lines), includeHarmonics)
+		antinodes := findAntinodesForSymbol(ants, len(lines[0]), len(lines), includeHarmonics)
 		for _, at := range antinodes {
 			seen[at] = true
 		}
 	}
 
-	grid := runner.ReadRuneGrid(lines)
 	for p := range seen {
-		grid[p.y][p.x] = '#'
+		g.Set(p.Y, p.X, '#')
 	}
-	for i, row := range grid {
-		fmt.Println(fmt.Sprintf("%.2d", i), string(row))
-	}
-	fmt.Println()
+	g.Print()
 	return len(seen), nil
 }
 
-func findAntinodes(positions []point, limitx, limity int, includeHarmonics bool) []point {
-	var output []point
-	for i, p1 := range positions {
-		for _, p2 := range positions[i:] {
+func findAntinodesForSymbol(antennas []grid.Point, limitx, limity int, includeHarmonics bool) []grid.Point {
+	var output []grid.Point
+	for i, p1 := range antennas {
+		for _, p2 := range antennas[i:] {
 			if p1 == p2 {
 				continue
 			}
-			dx := p1.x - p2.x
-			dy := p1.y - p2.y
+			dx := p1.X - p2.X
+			dy := p1.Y - p2.Y
 			if dx < 0 {
 				dx *= -1
 			}
@@ -77,36 +68,29 @@ func findAntinodes(positions []point, limitx, limity int, includeHarmonics bool)
 	return output
 }
 
-const (
-	LEFT  = -1
-	RIGHT = 1
-	UP    = -1
-	DOWN  = 1
-)
-
-func possibleAntinodes(a1, a2 point, dx, dy, limitx, limity int, includeHarmonics bool) []point {
-	leftp := a1
-	rightp := a2
-	if a1.x > a2.x {
-		leftp = a2
-		rightp = a1
+func possibleAntinodes(p1, p2 grid.Point, dx, dy, limitx, limity int, includeHarmonics bool) []grid.Point {
+	leftp := p1
+	rightp := p2
+	if p1.X > p2.X {
+		leftp = p2
+		rightp = p1
 	}
 
-	var positions []point
-	if leftp.y < rightp.y {
-		positions = append(positions, findAll(leftp, LEFT, UP, dx, dy, limitx, limity, includeHarmonics)...)
-		positions = append(positions, findAll(rightp, RIGHT, DOWN, dx, dy, limitx, limity, includeHarmonics)...)
-	} else {
-		positions = append(positions, findAll(leftp, LEFT, DOWN, dx, dy, limitx, limity, includeHarmonics)...)
-		positions = append(positions, findAll(rightp, RIGHT, UP, dx, dy, limitx, limity, includeHarmonics)...)
-	}
+	var antinodes []grid.Point
 	if includeHarmonics {
-		positions = append(positions, leftp, rightp)
+		antinodes = append(antinodes, leftp, rightp)
 	}
-	return positions
+	if leftp.Y < rightp.Y {
+		antinodes = append(antinodes, findAll(leftp, grid.LEFT, grid.UP, dx, dy, limitx, limity, includeHarmonics)...)
+		antinodes = append(antinodes, findAll(rightp, grid.RIGHT, grid.DOWN, dx, dy, limitx, limity, includeHarmonics)...)
+	} else {
+		antinodes = append(antinodes, findAll(leftp, grid.LEFT, grid.DOWN, dx, dy, limitx, limity, includeHarmonics)...)
+		antinodes = append(antinodes, findAll(rightp, grid.RIGHT, grid.UP, dx, dy, limitx, limity, includeHarmonics)...)
+	}
+	return antinodes
 }
 
-func findAll(p point, dirx, diry, dx, dy, limitx, limity int, includeHarmonics bool) (result []point) {
+func findAll(p grid.Point, dirx, diry, dx, dy, limitx, limity int, includeHarmonics bool) (result []grid.Point) {
 	for {
 		dx2 := dx * dirx
 		dy2 := dy * diry
@@ -122,19 +106,19 @@ func findAll(p point, dirx, diry, dx, dy, limitx, limity int, includeHarmonics b
 	}
 }
 
-func outOfBounds(p point, limitx, limity int) bool {
-	if p.x < 0 || p.y < 0 {
+func outOfBounds(p grid.Point, limitx, limity int) bool {
+	if p.X < 0 || p.Y < 0 {
 		return true
 	}
-	if p.x >= limitx || p.y >= limity {
+	if p.X >= limitx || p.Y >= limity {
 		return true
 	}
 	return false
 }
 
-func antinode(p point, deltax, deltay int) point {
-	return point{
-		x: p.x + deltax,
-		y: p.y + deltay,
+func antinode(p grid.Point, deltax, deltay int) grid.Point {
+	return grid.Point{
+		X: p.X + deltax,
+		Y: p.Y + deltay,
 	}
 }
