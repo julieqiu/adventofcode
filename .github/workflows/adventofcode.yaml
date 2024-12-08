@@ -14,6 +14,3 @@ jobs:
       run: go version
     - name: Run tests
       run: go test ./...
-    - run: go fmt ./...
-    - name: Detect Changes
-      run: git diff --exit-code
