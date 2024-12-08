@@ -31,10 +31,10 @@ func Run(problem1, problem2 func([]string) (int, error)) error {
 	return nil
 }
 
-func RunTest(t *testing.T, problem func([]string) (int, error), want int) {
+func RunTestWithFile(t *testing.T, problem func([]string) (int, error), want int, f string) {
 	t.Helper()
 
-	input, err := readFile("example.txt")
+	input, err := readFile(f)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,6 +49,10 @@ func RunTest(t *testing.T, problem func([]string) (int, error), want int) {
 	if got != want {
 		t.Errorf("got = %d; want = %d", got, want)
 	}
+}
+
+func RunTest(t *testing.T, problem func([]string) (int, error), want int) {
+	RunTestWithFile(t, problem, want, "example.txt")
 }
 
 func ReadLines(input string) (_ []string, err error) {
