@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -91,4 +92,19 @@ func ReadRuneGrid(lines []string) (_ [][]rune) {
 		}
 	}
 	return grid
+}
+
+func ReadIntGrid(lines []string) (_ [][]int, err error) {
+	grid := make([][]int, len(lines))
+	for r, row := range lines {
+		grid[r] = make([]int, len(lines[0]))
+		for c, val := range row {
+			n, err := strconv.Atoi(string(val))
+			if err != nil {
+				return nil, err
+			}
+			grid[r][c] = n
+		}
+	}
+	return grid, nil
 }
