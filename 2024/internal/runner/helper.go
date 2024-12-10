@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func Run(problem1, problem2 func([]string) (int, error)) error {
@@ -17,17 +18,20 @@ func Run(problem1, problem2 func([]string) (int, error)) error {
 	if err != nil {
 		return err
 	}
+
+	start := time.Now()
 	ans, err := problem1(lines)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Answer (part 1): %v\n", ans)
+	fmt.Printf("Answer (part 1): %v (%v) \n", ans, time.Since(start))
 
+	start = time.Now()
 	ans, err = problem2(lines)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Answer (part 2): %v\n", ans)
+	fmt.Printf("Answer (part 2): %v (%v) \n", ans, time.Since(start))
 	return nil
 }
 
